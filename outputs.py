@@ -42,4 +42,3 @@ def file_output(results, cli_args):
     with open(file_path, 'w', encoding='utf-8') as f:
         writer = csv.writer(f, dialect='unix')
         writer.writerows(results)
-        
