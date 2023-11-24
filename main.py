@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from constants import BASE_DIR, MAIN_DOC_URL
 from configs import configure_argument_parser
+from outputs import control_output
 
 
 def whats_new(session):
@@ -20,7 +21,7 @@ def whats_new(session):
     section_by_python = div_with_ul.find_all(
         'li', attrs={'class': 'toctree-l1'}
     )
-    result = []
+    results = [('Ссылка на статью', 'Заголовок', 'Редактор, автор')]
     for section in tqdm(section_by_python):
         version_a_tag = section.find('a')
         href = version_a_tag['href']
@@ -31,9 +32,10 @@ def whats_new(session):
         h1 = soup.find('h1').text
         dl = soup.find('dl').text
         dl.replace('\n', ' ')
-        result.append((version_link, h1, dl))
-    for row in result:
-        print(*row)
+        results.append((version_link, h1, dl))
+    # for row in result:
+    #     print(*row)
+    return results
 
 
 def latest_versions(session):
@@ -48,7 +50,7 @@ def latest_versions(session):
             a_tags = ul.find_all('a')
             break
 
-    results = []
+    results = [('Ссылка на документацию', 'Версия', 'Статус')]
     pattern = r'Python (?P<version>\d\.\d+) \((?P<status>.*)\)'
     for a_tag in a_tags:
         link = a_tag['href']
@@ -59,8 +61,9 @@ def latest_versions(session):
             version, status = a_tag.text, ''
         results.append((link, version, status))
 
-    for row in results:
-        print(*row)
+    # for row in results:
+    #     print(*row)
+    return results
 
 
 def download(session):
@@ -98,7 +101,9 @@ def main():
     if args.clear_cache:
         session.cache.clear()
     parser_mode = args.mode
-    MODE_TO_FUNCTION[parser_mode](session)
+    results = MODE_TO_FUNCTION[parser_mode](session)
+    if results is not None:
+        control_output(results, args)
 
 
 if __name__ == "__main__":
